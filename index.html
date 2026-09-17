@@ -1,0 +1,1327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PC Demand Signal (PCDS) — Base</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0f1a; --panel:#121827; --panel-2:#0f1422; --line:#1f2a44;
+    --ink:#e6ecf5; --ink-dim:#9aa8c3; --ink-mute:#6b7897;
+    --accent:#5eead4; --accent-2:#60a5fa; --warn:#f59e0b; --hot:#ef4444;
+    --good:#22c55e; --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif}
+  a{color:var(--accent-2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 26px 48px}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);flex-shrink:0}
+  .topbar h1{margin:0;font-size:20px;letter-spacing:.2px}
+  .topbar .sub{color:var(--ink-dim);font-size:12.5px;margin-top:4px}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-size:12px;color:var(--ink-dim)}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(94,234,212,.7);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(94,234,212,.6)}70%{box-shadow:0 0 0 10px rgba(94,234,212,0)}100%{box-shadow:0 0 0 0 rgba(94,234,212,0)}}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .k-title{font-size:11px;text-transform:uppercase;color:var(--ink-mute);letter-spacing:1px}
+  .kpi .k-val{font-size:36px;margin-top:6px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+  .kpi .k-val.sm{font-size:28px}
+  .kpi .k-sub{font-size:12px;color:var(--ink-dim);margin-top:6px}
+  .state-bear{color:var(--bad)} .state-neut{color:var(--warn)} .state-bull{color:var(--good)}
+  .lead-on{color:var(--warn)} .lead-off{color:var(--ink-mute)}
+  .grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-bottom:14px}
+  .grid2b{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .p-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+  .p-title h3{margin:0;font-size:14px;letter-spacing:.2px}
+  .p-title .meta{font-size:11.5px;color:var(--ink-mute)}
+  .chart-wrap{position:relative;height:240px}
+  .chart-wrap.rail{height:140px}
+  .chart-wrap.tam{height:300px}
+  .tam-caption{margin-top:10px;font-size:11.5px;color:var(--ink-mute);line-height:1.55}
+  .tam-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin:4px 0 8px;font-size:11.5px;color:var(--ink-dim)}
+  .tam-legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:18px;height:3px;border-radius:2px;display:inline-block}
+  .swatch.dash{background:repeating-linear-gradient(90deg,#ef4444 0 6px,transparent 6px 10px)}
+  .swatch.hist{background:var(--ink-dim)}
+  .swatch.asp{background:transparent;border:1.5px solid #5eead4;height:0;width:18px;border-radius:0;box-shadow:0 0 0 0;position:relative;top:-1px}
+  .swatch.asp-dash{background:transparent;border:1.5px dashed #2dd4bf;height:0;width:18px;border-radius:0;position:relative;top:-1px}
+  .chain{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:space-between;margin-top:4px}
+  .chain-node{flex:1 1 110px;min-width:100px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;position:relative}
+  .chain-node + .chain-node{margin-left:6px}
+  .chain-arrow{display:none}
+  .cn-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-mute)}
+  .cn-name{font-size:12.5px;font-weight:600;margin-top:4px}
+  .cn-chip{display:inline-block;margin-top:8px;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid transparent}
+  .heat-low{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--good)}
+  .heat-mid{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4);color:var(--warn)}
+  .heat-high{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.45);color:#fca5a5}
+  .inputs-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .inputs-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-mute);padding:8px 10px;border-bottom:1px solid var(--line)}
+  .inputs-table td{padding:8px 10px;border-bottom:1px solid rgba(31,42,68,.6);color:var(--ink-dim)}
+  .inputs-table tr:last-child td{border-bottom:none}
+  .inputs-table td.val{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10.5px;font-weight:600;letter-spacing:.3px}
+  .tag-confirmed{background:rgba(94,234,212,.12);color:var(--accent);border:1px solid rgba(94,234,212,.3)}
+  .tag-reported{background:rgba(96,165,250,.12);color:var(--accent-2);border:1px solid rgba(96,165,250,.3)}
+  .footer{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-mute);font-size:11.5px;line-height:1.6}
+  .footer code{color:var(--ink-dim);font-size:11px}
+  .inform{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);color:var(--warn);font-size:11px;font-weight:600}
+  @media(max-width:980px){
+    .kpis,.grid2,.grid2b{grid-template-columns:1fr 1fr}
+    .chain-node + .chain-node{margin-left:0;margin-top:8px}
+  }
+  @media(max-width:640px){
+    .kpis,.grid2,.grid2b{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <div class="brand"><span class="brand-dot"></span>
+        <div>
+          <h1>PC Demand Signal (PCDS)</h1>
+          <div class="sub" id="hdrSub"></div>
+        </div>
+      </div>
+    </div>
+    <div class="badge"><span class="pulse"></span> Base · asof <span id="asofBadge"></span> <span class="inform">Inform only</span></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="k-title">State code</div>
+      <div class="k-val" id="kpiState"></div>
+      <div class="k-sub" id="kpiStateLabel"></div>
+    </div>
+    <div class="kpi">
+      <div class="k-title">PCDS score (−2…+2)</div>
+      <div class="k-val sm" id="kpiScore"></div>
+      <div class="k-sub">Thresholds: ≤−0.5 bearish · mid neutral · ≥+0.5 bullish</div>
+    </div>
+    <div class="kpi">
+      <div class="k-title">Lead flag</div>
+      <div class="k-val sm" id="kpiLead"></div>
+      <div class="k-sub" id="kpiLeadSub"></div>
+    </div>
+    <div class="kpi">
+      <div class="k-title">Pressure weighted</div>
+      <div class="k-val sm" id="kpiPressure"></div>
+      <div class="k-sub">Positive = bearish pressure on PC units</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="p-title">
+        <h3>VAMS-style state rail</h3>
+        <span class="meta">Needle at PCDS score · bands ≤−0.5 / mid / ≥+0.5</span>
+      </div>
+      <div class="chart-wrap rail"><canvas id="railChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="p-title">
+        <h3>Causal chain</h3>
+        <span class="meta">AI CapEx → Memory $ → BOM/ASP → Elasticity → Units/Refresh</span>
+      </div>
+      <div class="chain" id="causalChain"></div>
+    </div>
+  </div>
+
+  <div class="grid2b">
+    <div class="panel">
+      <div class="p-title">
+        <h3>Sub-index pressure</h3>
+        <span class="meta">A…E · −2…+2 · hotter = more pressure · weight %</span>
+      </div>
+      <div class="chart-wrap"><canvas id="subChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="p-title">
+        <h3>Weighted contribution</h3>
+        <span class="meta">weightᵢ × subᵢ · sorted by contribution</span>
+      </div>
+      <div class="chart-wrap"><canvas id="contribChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px">
+    <div class="p-title">
+      <h3>PC unit TAM — 8Q history + 4Q forecast (PCDS-colored)</h3>
+      <span class="meta">Units (left, M) · US PC ASP (right, USD) · Base only</span>
+    </div>
+    <div class="tam-legend">
+      <span><i class="swatch" style="background:#22c55e"></i> Bullish (+2)</span>
+      <span><i class="swatch" style="background:#f59e0b"></i> Neutral (0)</span>
+      <span><i class="swatch" style="background:#ef4444"></i> Bearish (−2)</span>
+      <span><i class="swatch hist"></i> Units history (left)</span>
+      <span><i class="swatch dash"></i> Units forecast (left)</span>
+      <span><i class="swatch asp"></i> ASP history (right)</span>
+      <span><i class="swatch asp-dash"></i> ASP forecast (right)</span>
+    </div>
+    <div class="chart-wrap tam"><canvas id="tamChart"></canvas></div>
+    <div class="tam-caption" id="tamCaption"></div>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px">
+    <div class="p-title">
+      <h3>Base inputs</h3>
+      <span class="meta">Confirmed / Reported from method-v0.json seed_inputs</span>
+    </div>
+    <table class="inputs-table">
+      <thead><tr><th>Input</th><th>Value</th><th>Label</th><th>Note</th></tr></thead>
+      <tbody id="inputsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Paths: <code>METHOD.md</code> · <code>pcds.py</code> · <code>pc-tam-series.json</code> (units + asp_usd) · <code>PC-Demand-Signal-v0.xlsx</code> · <code>last-state.json</code><br/>
+    Scenarios: prompt Leonidas — SoftLanding / SoftLanding_Full / HardElasticity / AI_CapEx_Cut / AI_CapEx_Surge<br/>
+    Recreation / Semi Desk PCDS v0 — NOT official 42 Macro VAMS · Inform only — no brokerage
+  </div>
+</div>
+
+<script>
+const PCDS = {
+  "asof": "2026-09-16",
+  "method": "Recreation / Semi Desk PCDS v0",
+  "scenario": "Base",
+  "label_required": "Recreation / Semi Desk PCDS v0 \u2014 NOT official 42 Macro VAMS",
+  "inputs": {
+    "dram_qoq_pct": 15.5,
+    "nand_qoq_pct": 12.5,
+    "dram_spot_cool_flag": 1.0,
+    "global_pc_units_yoy_pct": -4.0,
+    "us_asp_yoy_pct": 12.0,
+    "hp_ps_rev_pct": 18.0,
+    "hp_ps_units_pct": -16.0,
+    "channel_deferral": 0.55,
+    "ai_capex_index": 1.0,
+    "dell_pc_to_infra_redirect": 1.0,
+    "win11_refresh_done": 0.7,
+    "expected_units_h2_pct": -16.5,
+    "intel_pc_2026_pct": -12.0
+  },
+  "sub_indices": {
+    "A_MemoryCostPressure": 1.4,
+    "B_OemAspUnitDivergence": 1.8594,
+    "C_ChannelDeferral": 1.3333,
+    "D_AiReallocationHeat": 1.3,
+    "E_RefreshResidual": 1.3125
+  },
+  "weights": {
+    "A_MemoryCostPressure": 0.25,
+    "B_OemAspUnitDivergence": 0.2,
+    "C_ChannelDeferral": 0.2,
+    "D_AiReallocationHeat": 0.2,
+    "E_RefreshResidual": 0.15
+  },
+  "pressure_weighted": 1.4454,
+  "composite": -1.4454,
+  "pcds_score": -1.4454,
+  "state_code": -2,
+  "state_label": "bearish_pc_demand",
+  "lead_flag": true,
+  "thresholds": {
+    "bullish": 0.5,
+    "bearish": -0.5,
+    "note": "composite >= +0.5 \u2192 +2; -0.5 < composite < +0.5 \u2192 0; composite <= -0.5 \u2192 -2"
+  },
+  "inform_only": true,
+  "no_brokerage": true
+};
+const TAM = {
+  "asof": "2026-09-16",
+  "title": "PC unit TAM \u2014 worldwide traditional PC shipments",
+  "units": "millions of units",
+  "definition": "IDC traditional PCs = desktops + notebooks + workstations; excludes tablets and x86 servers.",
+  "tracker_preference": "IDC Worldwide Quarterly Personal Computing Device Tracker (public PRs / secondary tables of those PRs)",
+  "label_required": "Recreation / Semi Desk PCDS v0 \u2014 NOT official 42 Macro VAMS",
+  "base_pcds": {
+    "state_code": -2,
+    "state_label": "bearish_pc_demand",
+    "lead_flag": true,
+    "desk_seeds": {
+      "expected_units_h2_pct": -16.5,
+      "global_fy_path_pct": [
+        -11,
+        -12
+      ],
+      "note": "Base H2 path ~\u221216.5% US / global FY \u221211\u201312% from desk seeds (method-v0.json)"
+    }
+  },
+  "color_map": {
+    "bullish": {
+      "state_code": 2,
+      "hex": "#22c55e"
+    },
+    "neutral": {
+      "state_code": 0,
+      "hex": "#f59e0b"
+    },
+    "bearish": {
+      "state_code": -2,
+      "hex": "#ef4444"
+    }
+  },
+  "historical_pcds_proxy_method": {
+    "label": "Historical PCDS proxy (recreation) \u2014 not live PCDS",
+    "live_pcds_available_from": "2026-09-16",
+    "rule": "Map quarterly YoY unit change (+ optional pull-forward / ASP-pressure flags) to VAMS-style \u22122/0/+2. Thresholds: YoY \u2265 +6% and no inventory/memflation pull-forward flag \u2192 +2; YoY \u2265 0% (or mild decline > \u22123% without ASP bite) \u2192 0; else \u2192 \u22122. Exception: strong YoY with explicit memflation/inventory pull-forward warning \u2192 0 (not +2). Latest history quarter (Q2'26) forced to live Base (\u22122).",
+    "asp_pressure_inputs_when_known": "Numeric US ASP series now on secondary axis (asp_usd). Qualitative Omdia/IDC/OEM ASP\u2191/units\u2193 flags remain in proxy notes."
+  },
+  "forecast_method": {
+    "label": "Forecast / Recreation under Base PCDS \u22122 \u2014 not a consensus print",
+    "horizon": "Q3'26\u2013Q2'27 (4 quarters from last history print Q2'26)",
+    "formula_paragraph": "Forecast units[q] = units[q\u22124] \u00d7 (1 + bearish_yoy[q]), where bearish_yoy for F1\u2026F4 (Q3'26, Q4'26, Q1'27, Q2'27) = [\u221213.5%, \u221219.5%, \u221214.0%, \u221211.0%]. The H2'26 pair (\u221213.5%, \u221219.5%) is calibrated so (F1+F2)/(Q3'25+Q4'25) \u2248 \u221216.5% (desk Base H2 path); Q4'26 sits near IDC public language of ~\u221220% YoY trough; Q1\u2013Q2'27 fade toward the desk global FY \u221211\u201312% exit while remaining bearish under live Base state_code \u22122. Seasonality is inherited entirely from the prior-year same-quarter IDC print (no extra seasonal overlay). All forecast points are labeled Forecast / Recreation \u2014 not Confirmed.",
+    "bearish_yoy_path_pct": [
+      -13.5,
+      -19.5,
+      -14.0,
+      -11.0
+    ],
+    "h2_2026_check": {
+      "prior_h2_units_m": 152.3,
+      "forecast_h2_units_m": 127.176,
+      "implied_h2_yoy_pct": -16.5
+    },
+    "state_coloring": "All forecast points and the forecast path use live Base PCDS state_code \u22122 (bearish #ef4444)."
+  },
+  "history": [
+    {
+      "slot": "H1",
+      "quarter": "2024Q3",
+      "label": "Q3'24",
+      "units_m": 69.3,
+      "yoy_pct": -2.4,
+      "yoy_note": "YoY from contemporaneous IDC Q3'24 PR (\u22122.4% at preliminary 68.8M). Level 69.3 is the revised prior-year total in the IDC Q3'25 PR table.",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 0,
+      "pcds_state_label": "neutral",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "color_hex": "#f59e0b",
+      "sources": [
+        {
+          "name": "IDC Q3'25 PR (current 75.9; prior-year 69.3)",
+          "url": "https://my.idc.com/getdoc.jsp?containerId=prUS53855725"
+        },
+        {
+          "name": "IDC Q3'24 PR via Yahoo (contemporaneous YoY \u22122.4%, prelim ~68.8)",
+          "url": "https://finance.yahoo.com/news/global-pc-shipments-dip-slightly-130000963.html"
+        }
+      ],
+      "asp_usd": 919,
+      "asp_yoy_pct": 0.0,
+      "asp_status": "Interpolated",
+      "asp_interpolated": true,
+      "asp_note": "No public Omdia dollar print for Q3'24. Set equal to digitized Q3'25 ($919) implying ~0% YoY \u2014 pre-memflation placeholder. Flagged interpolated.",
+      "asp_sources": [
+        {
+          "name": "Interpolation rule (see asp_series.history_method.sparse_note)",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "slot": "H2",
+      "quarter": "2024Q4",
+      "label": "Q4'24",
+      "units_m": 69.7,
+      "yoy_pct": 1.8,
+      "yoy_note": "YoY from contemporaneous IDC Q4'24 PR (+1.8% at preliminary 68.9M). Level 69.7 is the revised prior-year total in the IDC Q4'25 PR table.",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 0,
+      "pcds_state_label": "neutral",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "color_hex": "#f59e0b",
+      "sources": [
+        {
+          "name": "IDC Q4'25 PR via Electronics Weekly (76.4; prior-year 69.7)",
+          "url": "https://www.electronicsweekly.com/news/business/q4-pc-shipments-rose-9-6-yoy-2026-01/"
+        },
+        {
+          "name": "IDC Q4'24 PR (contemporaneous +1.8%, prelim 68.9)",
+          "url": "https://my.idc.com/getdoc.jsp?containerId=prUS53061925"
+        }
+      ],
+      "asp_usd": 934,
+      "asp_yoy_pct": 0.0,
+      "asp_status": "Interpolated",
+      "asp_interpolated": true,
+      "asp_note": "No public Omdia dollar print for Q4'24. Set equal to digitized Q4'25 ($934) implying ~0% YoY. Flagged interpolated.",
+      "asp_sources": [
+        {
+          "name": "Interpolation rule (see asp_series.history_method.sparse_note)",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "slot": "H3",
+      "quarter": "2025Q1",
+      "label": "Q1'25",
+      "units_m": 64.0,
+      "yoy_pct": 4.9,
+      "yoy_note": "YoY from contemporaneous IDC Q1'25 PR (+4.9% at preliminary 63.2M). Level 64.0 is the prior-year total in the IDC Q1'26 secondary table (Gigazine).",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 0,
+      "pcds_state_label": "neutral",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "proxy_flags": [
+        "tariff_pull_forward"
+      ],
+      "color_hex": "#f59e0b",
+      "sources": [
+        {
+          "name": "IDC PCD promo (Q1'26 traditional PC 65.6M)",
+          "url": "https://www.idc.com/promo/pcdforecast/"
+        },
+        {
+          "name": "Gigazine table of IDC Q1'26 (prior-year 64.0; +2.5%)",
+          "url": "https://gigazine.net/gsc_news/en/20260411-pc-market-2026-q1/"
+        },
+        {
+          "name": "IDC Q1'25 PR (contemporaneous +4.9%, prelim 63.2)",
+          "url": "https://my.idc.com/getdoc.jsp?containerId=prUS53304025"
+        }
+      ],
+      "asp_usd": 939,
+      "asp_yoy_pct": null,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Digitized from Omdia June 2026 PR ASP chart (2025 navy bar Q1). Prior-year YoY not labeled on chart.",
+      "asp_sources": [
+        {
+          "name": "Omdia June 2026 ASP chart (Newswire hi-res)",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        },
+        {
+          "name": "Omdia 1Q26 PR",
+          "url": "https://omdia.tech.informa.com/pr/2026/june/us-pc-shipments-fell-7percent-in-1q26-marking-steepest-decline-since-2023"
+        }
+      ]
+    },
+    {
+      "slot": "H4",
+      "quarter": "2025Q2",
+      "label": "Q2'25",
+      "units_m": 71.7,
+      "yoy_pct": 6.5,
+      "yoy_note": "YoY from contemporaneous IDC Q2'25 PR (+6.5% at preliminary 68.4M). Level 71.7 is the revised prior-year total in the IDC Q2'26 PR table (Others category revised upward).",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 2,
+      "pcds_state_label": "bullish_pc_demand",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "color_hex": "#22c55e",
+      "sources": [
+        {
+          "name": "IDC Q2'26 PR via Electronics Weekly (prior-year 71.7)",
+          "url": "https://www.electronicsweekly.com/news/business/899811-2026-07/"
+        },
+        {
+          "name": "IDC Q2'25 PR (contemporaneous +6.5%, prelim 68.4)",
+          "url": "https://my.idc.com/getdoc.jsp?containerId=prUS53677225"
+        },
+        {
+          "name": "IDC Q2'25 via Electronics Weekly",
+          "url": "https://www.electronicsweekly.com/news/business/q2-pcs-up-6-5-yoy-2025-07/"
+        }
+      ],
+      "asp_usd": 909,
+      "asp_yoy_pct": null,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Digitized from Omdia June 2026 PR ASP chart (2025 navy bar Q2). Implied by Q2'26 $1,020 / 1.12 \u2248 $911 \u2014 chart read $909.",
+      "asp_sources": [
+        {
+          "name": "Omdia June 2026 ASP chart",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        }
+      ]
+    },
+    {
+      "slot": "H5",
+      "quarter": "2025Q3",
+      "label": "Q3'25",
+      "units_m": 75.9,
+      "yoy_pct": 9.4,
+      "yoy_note": "IDC Q3'25 PR table total 75.9 (+9.4% YoY vs 69.3).",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 2,
+      "pcds_state_label": "bullish_pc_demand",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "color_hex": "#22c55e",
+      "sources": [
+        {
+          "name": "IDC Q3'25 PR",
+          "url": "https://my.idc.com/getdoc.jsp?containerId=prUS53855725"
+        }
+      ],
+      "asp_usd": 919,
+      "asp_yoy_pct": null,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Digitized from Omdia June 2026 PR ASP chart (2025 navy bar Q3).",
+      "asp_sources": [
+        {
+          "name": "Omdia June 2026 ASP chart",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        }
+      ]
+    },
+    {
+      "slot": "H6",
+      "quarter": "2025Q4",
+      "label": "Q4'25",
+      "units_m": 76.4,
+      "yoy_pct": 9.6,
+      "yoy_note": "IDC Q4'25 PR via Electronics Weekly: 76.4 (+9.6% YoY vs 69.7). Proxy forced to neutral despite strong YoY due to memflation / inventory pull-forward warning in the same print.",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 0,
+      "pcds_state_label": "neutral",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "proxy_flags": [
+        "memflation_inventory_pull_forward"
+      ],
+      "color_hex": "#f59e0b",
+      "sources": [
+        {
+          "name": "IDC Q4'25 PR via Electronics Weekly",
+          "url": "https://www.electronicsweekly.com/news/business/q4-pc-shipments-rose-9-6-yoy-2026-01/"
+        }
+      ],
+      "asp_usd": 934,
+      "asp_yoy_pct": null,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Digitized from Omdia June 2026 PR ASP chart (2025 navy bar Q4). Gartner Q4'25 qualitative: stable or slightly lower ASPs (worldwide) \u2014 consistent with flat H2'25 US levels.",
+      "asp_sources": [
+        {
+          "name": "Omdia June 2026 ASP chart",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        },
+        {
+          "name": "Gartner Q4'25 PR (ASP qualitative)",
+          "url": "https://www.gartner.com/en/newsroom/press-releases/2026-1-20-gartner-says-worldwide-pc-shipments-increased-9-point-3-percent-in-fourth-quarter-of-2025-and-9-point-1-percent-for-the-full-year"
+        }
+      ]
+    },
+    {
+      "slot": "H7",
+      "quarter": "2026Q1",
+      "label": "Q1'26",
+      "units_m": 65.6,
+      "yoy_pct": 2.5,
+      "yoy_note": "IDC Q1'26 traditional PC total 65.6; Gigazine table +2.5% vs 64.0. IDC promo page also cites ~3% YoY / 65.6. Gartner Q1'26 noted growth as artificially inflated (inventory ahead of memflation) \u2014 used as proxy flag only.",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": 0,
+      "pcds_state_label": "neutral",
+      "pcds_series_label": "Historical PCDS proxy (recreation)",
+      "proxy_flags": [
+        "inventory_pull_forward_memflation"
+      ],
+      "color_hex": "#f59e0b",
+      "sources": [
+        {
+          "name": "IDC PCD promo (Q1'26 PC 65.6M)",
+          "url": "https://www.idc.com/promo/pcdforecast/"
+        },
+        {
+          "name": "Gigazine table of IDC Q1'26 PR",
+          "url": "https://gigazine.net/gsc_news/en/20260411-pc-market-2026-q1/"
+        },
+        {
+          "name": "Gartner Q1'26 PR (inventory-inflation color)",
+          "url": "https://www.gartner.com/en/newsroom/press-releases/2026-4-10-gartner-says-worldwide-pc-shipments-increased-4-percent-in-first-quarter-of-2026"
+        }
+      ],
+      "asp_usd": 980,
+      "asp_yoy_pct": 4.4,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Digitized Omdia June chart gold Q1 bar; Omdia text ASP +4% YoY in 1Q26 (chart pixel YoY +4.4% vs $939).",
+      "asp_sources": [
+        {
+          "name": "Omdia 1Q26 PR (+4% YoY ASP)",
+          "url": "https://omdia.tech.informa.com/pr/2026/june/us-pc-shipments-fell-7percent-in-1q26-marking-steepest-decline-since-2023"
+        },
+        {
+          "name": "Omdia June 2026 ASP chart",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        }
+      ]
+    },
+    {
+      "slot": "H8",
+      "quarter": "2026Q2",
+      "label": "Q2'26",
+      "units_m": 68.2,
+      "yoy_pct": -4.9,
+      "yoy_note": "IDC Q2'26 preliminary: 68.2 (\u22124.9% YoY vs revised 71.7). First decline after nine growth quarters. Desk seed global_pc_units_yoy_pct \u22124.0 is Omdia/IDC midpoint; chart uses IDC print \u22124.9.",
+      "status": "Reported",
+      "interpolated": false,
+      "pcds_state_code": -2,
+      "pcds_state_label": "bearish_pc_demand",
+      "pcds_series_label": "Live Base PCDS (matches dashboard Base \u22122)",
+      "live_base_match": true,
+      "color_hex": "#ef4444",
+      "sources": [
+        {
+          "name": "IDC Q2'26 PR via Electronics Weekly",
+          "url": "https://www.electronicsweekly.com/news/business/899811-2026-07/"
+        },
+        {
+          "name": "IDC Q2'26 via The Tech Outlook",
+          "url": "https://www.thetechoutlook.com/current-affairs/business/worldwide-pc-shipments-fell-4-9-yoy-in-q2-2026-to-68-2-million-units-idc/"
+        },
+        {
+          "name": "Asymco Q2'26 IDC/Omdia synthesis",
+          "url": "https://asymco.com/2026/07/14/worldwide-pc-market-update-q2-2026-omdia-overall-decline-4-apple-up-16-idc-overall-decline-of-4-9-apple-up-10/"
+        },
+        {
+          "name": "Desk research pack (Omdia \u22123.6% / IDC \u22124.9%)",
+          "url": "/workspace/sources/semis/research/2026-09-16-pc-elasticity-supply-chain.md"
+        }
+      ],
+      "asp_usd": 1020,
+      "asp_yoy_pct": 12.2,
+      "asp_status": "Reported",
+      "asp_interpolated": false,
+      "asp_note": "Omdia: US sell-in ASP exceeded $1,000 for first time, +12.0% YoY. Chart digitization pin $1,020 (pixel YoY +12.2% vs $909). Desk seed us_asp_yoy_pct = +12.",
+      "asp_sources": [
+        {
+          "name": "Omdia via InfotechLead 2026-09-09",
+          "url": "https://infotechlead.com/devices/us-pc-prices-cross-1000-as-ai-pcs-drive-13-revenue-growth-but-shipments-face-18-h2-slump-98231"
+        },
+        {
+          "name": "Omdia June 2026 ASP chart (calibration pin)",
+          "url": "https://file.newswire.co.kr/data/datafile2/data/2026/07/1028147215_20260708130355_4524716958.jpg"
+        },
+        {
+          "name": "Desk brief",
+          "url": "/workspace/briefs/inbox/2026-09-16-semi-pc-elasticity-supply.md"
+        }
+      ]
+    }
+  ],
+  "forecast": [
+    {
+      "slot": "F1",
+      "quarter": "2026Q3",
+      "label": "Q3'26",
+      "units_m": 65.674,
+      "yoy_pct": -13.5,
+      "prior_year_units_m": 75.9,
+      "status": "Forecast / Recreation",
+      "interpolated": false,
+      "pcds_state_code": -2,
+      "pcds_state_label": "bearish_pc_demand",
+      "pcds_series_label": "Live Base PCDS \u22122 (forecast path)",
+      "color_hex": "#ef4444",
+      "formula": "75.9 \u00d7 (1 \u2212 0.135) = 65.6735 \u2248 65.674",
+      "asp_usd": 1066,
+      "asp_yoy_pct": 16.0,
+      "prior_year_asp_usd": 919,
+      "asp_status": "Forecast / Recreation",
+      "asp_interpolated": false,
+      "asp_formula": "919 \u00d7 (1 + 0.16) = 1066.04 \u2248 1066",
+      "asp_note": "Base PCDS \u22122 recreation: Omdia Aug chart YoY ~+16% on digitized Q3'25 base. Peak path into Q4."
+    },
+    {
+      "slot": "F2",
+      "quarter": "2026Q4",
+      "label": "Q4'26",
+      "units_m": 61.502,
+      "yoy_pct": -19.5,
+      "prior_year_units_m": 76.4,
+      "status": "Forecast / Recreation",
+      "interpolated": false,
+      "pcds_state_code": -2,
+      "pcds_state_label": "bearish_pc_demand",
+      "pcds_series_label": "Live Base PCDS \u22122 (forecast path)",
+      "color_hex": "#ef4444",
+      "formula": "76.4 \u00d7 (1 \u2212 0.195) = 61.502",
+      "asp_usd": 1102,
+      "asp_yoy_pct": 18.0,
+      "prior_year_asp_usd": 934,
+      "asp_status": "Forecast / Recreation",
+      "asp_interpolated": false,
+      "asp_formula": "934 \u00d7 (1 + 0.18) = 1102.12 \u2248 1102",
+      "asp_note": "ASP peak quarter under recreation (Omdia Aug ~+18% YoY marker)."
+    },
+    {
+      "slot": "F3",
+      "quarter": "2027Q1",
+      "label": "Q1'27",
+      "units_m": 56.416,
+      "yoy_pct": -14.0,
+      "prior_year_units_m": 65.6,
+      "status": "Forecast / Recreation",
+      "interpolated": false,
+      "pcds_state_code": -2,
+      "pcds_state_label": "bearish_pc_demand",
+      "pcds_series_label": "Live Base PCDS \u22122 (forecast path)",
+      "color_hex": "#ef4444",
+      "formula": "65.6 \u00d7 (1 \u2212 0.14) = 56.416",
+      "asp_usd": 1029,
+      "asp_yoy_pct": 5.0,
+      "prior_year_asp_usd": 980,
+      "asp_status": "Forecast / Recreation",
+      "asp_interpolated": false,
+      "asp_formula": "980 \u00d7 (1 + 0.05) = 1029",
+      "asp_note": "Pass-through fading / plateau after Q4 peak; Omdia Aug ~+5% YoY; ASPs remain >$1,000."
+    },
+    {
+      "slot": "F4",
+      "quarter": "2027Q2",
+      "label": "Q2'27",
+      "units_m": 60.698,
+      "yoy_pct": -11.0,
+      "prior_year_units_m": 68.2,
+      "status": "Forecast / Recreation",
+      "interpolated": false,
+      "pcds_state_code": -2,
+      "pcds_state_label": "bearish_pc_demand",
+      "pcds_series_label": "Live Base PCDS \u22122 (forecast path)",
+      "color_hex": "#ef4444",
+      "formula": "68.2 \u00d7 (1 \u2212 0.11) = 60.698",
+      "asp_usd": 1020,
+      "asp_yoy_pct": 0.0,
+      "prior_year_asp_usd": 1020,
+      "asp_status": "Forecast / Recreation",
+      "asp_interpolated": false,
+      "asp_formula": "1020 \u00d7 (1 + 0.00) = 1020",
+      "asp_note": "Plateau at elevated level (Omdia Aug ~0% YoY); spot DRAM cooling watch \u2014 not an ASP crash."
+    }
+  ],
+  "chart_caption": "Sources: IDC traditional PC shipment PRs (units, left axis); Omdia US traditional PC sell-in ASP (USD, right axis \u2014 US not worldwide; see pc-tam-series.json asp_series). Unit forecast = Recreation under Base PCDS \u22122. ASP forecast = Recreation peak-then-plateau (Omdia Aug YoY path). Q3'24\u2013Q4'24 ASP interpolated (flagged). Historical unit colors = PCDS proxy until 2026-09-16; H8+forecast use live Base.",
+  "notes": [
+    "No invented shipment prints \u2014 history levels taken from IDC public PR tables or secondary republications of those tables.",
+    "Where IDC revised a prior-year total in a later PR, the chart uses the later (revised) level and documents the contemporaneous preliminary + YoY in yoy_note.",
+    "Omdia Q2'26 65.7M (\u22123.6%) is cited in desk research but not mixed into this IDC-preferring series.",
+    "Gartner levels differ by methodology and are used only for qualitative color (Q1'26 artificial inflation).",
+    "ASP series is US traditional PC sell-in (Omdia), NOT worldwide \u2014 labeled on chart and in asp_series.geography.",
+    "ASP dollar history Q1'25\u2013Q2'26 digitized from Omdia public PR charts; Q3'24\u2013Q4'24 interpolated with asp_interpolated:true.",
+    "ASP forecast (Q3'26\u2013Q2'27) is Forecast/Recreation under Base PCDS \u22122 using Omdia August YoY markers [+16,+18,+5,0]% \u2014 peak-then-plateau, not invented silent path.",
+    "Do not mix Gartner/IDC global ASP %+ into this US dollar series without relabeling."
+  ],
+  "asp_series": {
+    "metric": "US traditional PC sell-in ASP (USD)",
+    "geography": "United States (not worldwide)",
+    "definition": "Omdia PC Horizon Service sell-in ASP for US PCs excluding tablets (desktop + notebook). Worldwide dollar ASP not available in free public prints; US series used and labeled clearly.",
+    "units": "USD",
+    "tracker_preference": "Omdia PC Horizon Service (public PR charts / secondary republications)",
+    "axis": "secondary_right",
+    "history_method": {
+      "label": "Reported anchors from Omdia public PR charts + documented interpolation for pre-2025 gaps",
+      "digitization": "Q1'25\u2013Q2'26 dollar levels digitized from Omdia June 2026 PR chart \"Supply pressure drives PC avg. selling price past $1,000\" (Business Wire / Newswire republication), calibrated so Q2'26 = $1,020 (exceeded $1,000; YoY marker +12%). Pixel heights imply YoY ~+4.4%/+12.2%/+14.3%/+15.1% matching labeled 4%/12%/14%/15%.",
+      "sparse_note": "No public dollar ASP print for Q3'24\u2013Q4'24; those two points are Interpolated assuming ~0% YoY into same-quarter 2025 (Gartner Q4'25 language of stable/slightly lower ASPs; memflation narrative starts 2026). Never silent invent \u2014 flagged interpolated:true.",
+      "chart_assets": [
+        "/workspace/sources/semis/pc-demand-signal/assets/omdia-asp-hi.jpg",
+        "/workspace/sources/semis/pc-demand-signal/assets/omdia-asp.jpg"
+      ]
+    },
+    "forecast_method": {
+      "label": "Forecast / Recreation under Base PCDS \u22122 \u2014 peak-then-plateau (not a consensus print)",
+      "horizon": "Q3'26\u2013Q2'27 (aligned to unit TAM forecast slots F1\u2026F4)",
+      "path_choice": "Peak-then-plateau (not continued elevation): Omdia August 2026 PR chart \"US PC ASPs to remain above $1,000 through 2027\" shows ASP peaking around Q4'26 then settling near ~$1,020 in 1H'27; desk TrendForce 2026-09-16 DRAM spot cooling supports fading pass-through at the margin while contract/AI memory stays firm. Classic elasticity still holds \u2014 units fall under Base \u22122 while ASP stays elevated (> $1,000).",
+      "formula_paragraph": "asp_usd[q] = asp_usd[q\u22124] \u00d7 (1 + asp_yoy[q]), where asp_yoy for F1\u2026F4 (Q3'26, Q4'26, Q1'27, Q2'27) = [+16%, +18%, +5%, +0%]. YoY path read from Omdia August 2026 public ASP chart markers (approx. +16%/+18%/+5%/0%); prior-year ASP bases are the digitized Q3'25\u2013Q2'26 history levels. Equivalent: F1=919\u00d71.16, F2=934\u00d71.18, F3=980\u00d71.05, F4=1020\u00d71.00. All forecast ASP points labeled Forecast / Recreation \u2014 not Confirmed. Cross-checks: IDC/Gartner FY2026 ASP/price +17% language (direction); Omdia \"ASPs continue rising in early 2027\" then revenue \u22126% FY27 as price no longer covers volume.",
+      "asp_yoy_path_pct": [
+        16.0,
+        18.0,
+        5.0,
+        0.0
+      ],
+      "fy2026_cross_check": {
+        "approx_annual_asp_yoy_pct": 11.5,
+        "note": "Simple average of Q1\u2013Q4'26 YoY (+4.4, +12.2, +16, +18) \u2248 +12.7% \u2014 below IDC/Gartner ~+17% global/price language; US Omdia series is the chart series (do not force to +17)."
+      }
+    },
+    "sources_primary": [
+      {
+        "name": "Omdia via InfotechLead / Business Wire \u2014 US ASP exceeded $1,000 in 2Q26, +12% YoY",
+        "url": "https://infotechlead.com/devices/us-pc-prices-cross-1000-as-ai-pcs-drive-13-revenue-growth-but-shipments-face-18-h2-slump-98231",
+        "date": "2026-09-09"
+      },
+      {
+        "name": "Omdia June 2026 PR \u2014 US ASP +4% YoY in 1Q26; expects +12% in 2Q26 and >12% in H2",
+        "url": "https://omdia.tech.informa.com/pr/2026/june/us-pc-shipments-fell-7percent-in-1q26-marking-steepest-decline-since-2023",
+        "date": "2026-06-30"
+      },
+      {
+        "name": "Omdia August 2026 PR chart \u2014 US PC ASPs to remain above $1,000 through 2027",
+        "url": "https://www.businesswirechina.com/en/news/63963.html",
+        "date": "2026-09-09"
+      },
+      {
+        "name": "IDC blog \u2014 ASP growth ~+17% in 2026 (global direction)",
+        "url": "https://www.idc.com/resource-center/blog/pc-market-enters-volatile-territory-as-memory-shortage-persists-through-2027/",
+        "date": "2026-06-02"
+      },
+      {
+        "name": "Gartner \u2014 PC prices +17% YE26 vs 2025 (direction)",
+        "url": "https://www.gartner.com/en/newsroom/press-releases/2026-02-26-gartner-says-surging-memory-costs-will-reduce-global-pc-and-smartphone-shipments-in-2026",
+        "date": "2026-02-26"
+      },
+      {
+        "name": "Desk research pack / inbox brief (Omdia US ASP crossed $1,000 +12% 2Q26)",
+        "url": "/workspace/sources/semis/research/2026-09-16-pc-elasticity-supply-chain.md"
+      }
+    ]
+  }
+};
+const SEED_META = {
+  "dram_qoq_pct": {
+    "label": "Reported",
+    "note": "TrendForce PC DRAM contract QoQ 3Q26 midpoint of +13\u201318%"
+  },
+  "nand_qoq_pct": {
+    "label": "Reported",
+    "note": "TrendForce NAND QoQ midpoint of +10\u201315%"
+  },
+  "dram_spot_cool_flag": {
+    "label": "Reported",
+    "note": "TrendForce 2026-09-16 DRAM spot cooling \u2014 slight offset"
+  },
+  "global_pc_units_yoy_pct": {
+    "label": "Reported",
+    "note": "Omdia/IDC/Counterpoint Q2 ~\u22123.6 to \u22124.9; seed \u22124.0"
+  },
+  "us_asp_yoy_pct": {
+    "label": "Reported",
+    "note": "Omdia US ASP +12% YoY proxy"
+  },
+  "hp_ps_rev_pct": {
+    "label": "Confirmed",
+    "note": "HP PS rev +18% (Q3 seed)"
+  },
+  "hp_ps_units_pct": {
+    "label": "Confirmed",
+    "note": "HP PS units \u221216% (Q3 seed)"
+  },
+  "channel_deferral": {
+    "label": "Reported",
+    "note": "Omdia channel delay/cancel ~50\u201360%; seed 0.55"
+  },
+  "ai_capex_index": {
+    "label": "Reported",
+    "note": "1.0 = no slowdown / raised baseline; Dell AI backlog record; Jensen GB rental up"
+  },
+  "dell_pc_to_infra_redirect": {
+    "label": "Confirmed",
+    "note": "Dell call color PC\u2192infra memory redirect"
+  },
+  "win11_refresh_done": {
+    "label": "Confirmed",
+    "note": "HP ~70% Win11 refresh done"
+  },
+  "expected_units_h2_pct": {
+    "label": "Reported",
+    "note": "Midpoint US \u221218.4% (Omdia) / Lenovo H2 market \u221215%"
+  },
+  "intel_pc_2026_pct": {
+    "label": "Reported",
+    "note": "Intel industry PC 2026 low-double-digit decline proxy"
+  }
+};
+const SUB_KEYS = [{"key": "A_MemoryCostPressure", "short": "A MemoryCost", "name": "MemoryCost"}, {"key": "B_OemAspUnitDivergence", "short": "B OemAspUnit", "name": "OemAspUnit"}, {"key": "C_ChannelDeferral", "short": "C ChannelDeferral", "name": "ChannelDeferral"}, {"key": "D_AiReallocationHeat", "short": "D AiReallocation", "name": "AiReallocation"}, {"key": "E_RefreshResidual", "short": "E RefreshResidual", "name": "RefreshResidual"}];
+const INPUT_ROWS = [{"key": "dram_qoq_pct", "label": "PC DRAM QoQ %", "fmt": "15.5"}, {"key": "nand_qoq_pct", "label": "NAND QoQ %", "fmt": "12.5"}, {"key": "dram_spot_cool_flag", "label": "DRAM spot cool flag", "fmt": "1"}, {"key": "global_pc_units_yoy_pct", "label": "Global PC units YoY %", "fmt": "-4"}, {"key": "us_asp_yoy_pct", "label": "US ASP YoY %", "fmt": "12"}, {"key": "hp_ps_rev_pct", "label": "HP PS rev %", "fmt": "18"}, {"key": "hp_ps_units_pct", "label": "HP PS units %", "fmt": "-16"}, {"key": "channel_deferral", "label": "Channel deferral", "fmt": "0.55"}, {"key": "ai_capex_index", "label": "AI CapEx index", "fmt": "1"}, {"key": "dell_pc_to_infra_redirect", "label": "Dell PC\u2192infra redirect", "fmt": "1"}, {"key": "win11_refresh_done", "label": "Win11 refresh done", "fmt": "0.7"}, {"key": "expected_units_h2_pct", "label": "Expected units H2 %", "fmt": "-16.5"}, {"key": "intel_pc_2026_pct", "label": "Intel PC 2026 %", "fmt": "-12"}];
+
+function pressureColor(v) {
+  const t = Math.max(0, Math.min(1, (v + 2) / 4));
+  // low (green-ish) -> mid amber -> high red
+  if (v < 0.5) return 'rgba(34,197,94,' + (0.35 + t * 0.4).toFixed(2) + ')';
+  if (v < 1.2) return 'rgba(245,158,11,' + (0.45 + (v-0.5)/1.5).toFixed(2) + ')';
+  return 'rgba(239,68,68,' + Math.min(0.95, 0.55 + (v-1.2)/2).toFixed(2) + ')';
+}
+function pressureBorder(v) {
+  if (v < 0.5) return '#22c55e';
+  if (v < 1.2) return '#f59e0b';
+  return '#ef4444';
+}
+function heatClass(level) {
+  if (level === 'high') return 'heat-high';
+  if (level === 'mid') return 'heat-mid';
+  return 'heat-low';
+}
+function heatFromValue(val, kind) {
+  // returns {text, level} for causal chips
+  if (kind === 'ai') {
+    if (val >= 1.0) return {text: 'ai_capex ' + val.toFixed(1), level: 'high'};
+    if (val >= 0.85) return {text: 'ai_capex ' + val.toFixed(2), level: 'mid'};
+    return {text: 'ai_capex ' + val.toFixed(2), level: 'low'};
+  }
+  if (kind === 'dram') {
+    if (val >= 12) return {text: 'DRAM QoQ +' + val + '%', level: 'high'};
+    if (val >= 5) return {text: 'DRAM QoQ +' + val + '%', level: 'mid'};
+    return {text: 'DRAM QoQ ' + val + '%', level: 'low'};
+  }
+  if (kind === 'asp') {
+    if (val >= 10) return {text: 'US ASP +' + val + '%', level: 'high'};
+    if (val >= 3) return {text: 'US ASP +' + val + '%', level: 'mid'};
+    return {text: 'US ASP ' + val + '%', level: 'low'};
+  }
+  if (kind === 'channel') {
+    if (val >= 0.5) return {text: 'deferral ' + val.toFixed(2), level: 'high'};
+    if (val >= 0.35) return {text: 'deferral ' + val.toFixed(2), level: 'mid'};
+    return {text: 'deferral ' + val.toFixed(2), level: 'low'};
+  }
+  if (kind === 'units') {
+    if (val <= -12) return {text: 'H2 units ' + val + '%', level: 'high'};
+    if (val <= -5) return {text: 'H2 units ' + val + '%', level: 'mid'};
+    return {text: 'H2 units ' + val + '%', level: 'low'};
+  }
+  return {text: String(val), level: 'mid'};
+}
+
+(function render() {
+  const d = PCDS;
+  document.getElementById('hdrSub').textContent =
+    d.label_required + ' · scenario ' + (d.scenario || 'Base');
+  document.getElementById('asofBadge').textContent = d.asof;
+
+  const sc = d.state_code;
+  const stateEl = document.getElementById('kpiState');
+  const scoreEl = document.getElementById('kpiScore');
+  stateEl.textContent = (sc > 0 ? '+' : '') + sc;
+  if (sc === -2) { stateEl.className = 'k-val state-bear'; }
+  else if (sc === 2) { stateEl.className = 'k-val state-bull'; }
+  else { stateEl.className = 'k-val state-neut'; }
+  document.getElementById('kpiStateLabel').textContent = d.state_label.replace(/_/g, ' ');
+
+  const score = d.pcds_score;
+  scoreEl.textContent = (score > 0 ? '+' : '') + Number(score).toFixed(3);
+  if (score <= -0.5) scoreEl.className = 'k-val sm state-bear';
+  else if (score >= 0.5) scoreEl.className = 'k-val sm state-bull';
+  else scoreEl.className = 'k-val sm state-neut';
+
+  const lead = !!d.lead_flag;
+  const leadEl = document.getElementById('kpiLead');
+  leadEl.textContent = lead ? 'ON' : 'OFF';
+  leadEl.className = 'k-val sm ' + (lead ? 'lead-on' : 'lead-off');
+  document.getElementById('kpiLeadSub').textContent = lead
+    ? 'Units print lagging pressure'
+    : 'No early-warning divergence';
+
+  const pw = d.pressure_weighted;
+  const pwEl = document.getElementById('kpiPressure');
+  pwEl.textContent = (pw > 0 ? '+' : '') + Number(pw).toFixed(3);
+  pwEl.className = 'k-val sm ' + (pw > 0.5 ? 'state-bear' : (pw < -0.5 ? 'state-bull' : 'state-neut'));
+
+  // Causal chain
+  const inp = d.inputs;
+  const nodes = [
+    {name: 'AI CapEx', chip: heatFromValue(inp.ai_capex_index, 'ai')},
+    {name: 'Memory $', chip: heatFromValue(inp.dram_qoq_pct, 'dram')},
+    {name: 'BOM / ASP', chip: heatFromValue(inp.us_asp_yoy_pct, 'asp')},
+    {name: 'Elasticity', chip: heatFromValue(inp.channel_deferral, 'channel')},
+    {name: 'Units / Refresh', chip: heatFromValue(inp.expected_units_h2_pct, 'units')},
+  ];
+  const chain = document.getElementById('causalChain');
+  chain.innerHTML = nodes.map(n =>
+    '<div class="chain-node"><div class="cn-label">node</div><div class="cn-name">' + n.name +
+    '</div><span class="cn-chip ' + heatClass(n.chip.level) + '">' + n.chip.text + '</span></div>'
+  ).join('');
+
+  // Inputs table
+  const tbody = document.getElementById('inputsBody');
+  tbody.innerHTML = INPUT_ROWS.map(row => {
+    const key = row.key;
+    const val = inp[key];
+    const meta = SEED_META[key] || {label: '', note: ''};
+    const tagClass = meta.label === 'Confirmed' ? 'tag-confirmed' : 'tag-reported';
+    const disp = row.fmt;
+    return '<tr><td>' + row.label + '</td><td class="val">' + disp +
+      '</td><td><span class="tag ' + tagClass + '">' + (meta.label || '—') +
+      '</span></td><td>' + (meta.note || '') + '</td></tr>';
+  }).join('');
+
+  // Rail chart — floating-bar bands + needle plugin
+  const railCtx = document.getElementById('railChart').getContext('2d');
+  const needle = score;
+  new Chart(railCtx, {
+    type: 'bar',
+    data: {
+      labels: ['PCDS'],
+      datasets: [
+        {
+          label: 'bearish',
+          data: [[-2, -0.5]],
+          backgroundColor: 'rgba(239,68,68,.28)',
+          borderWidth: 0,
+          barPercentage: 0.5,
+          categoryPercentage: 0.9
+        },
+        {
+          label: 'neutral',
+          data: [[-0.5, 0.5]],
+          backgroundColor: 'rgba(245,158,11,.22)',
+          borderWidth: 0,
+          barPercentage: 0.5,
+          categoryPercentage: 0.9
+        },
+        {
+          label: 'bullish',
+          data: [[0.5, 2]],
+          backgroundColor: 'rgba(34,197,94,.22)',
+          borderWidth: 0,
+          barPercentage: 0.5,
+          categoryPercentage: 0.9
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {enabled: false},
+        needlePlugin: {value: needle}
+      },
+      scales: {
+        x: {
+          min: -2, max: 2,
+          ticks: {
+            color: '#6b7897',
+            callback: v => (v > 0 ? '+' : '') + v
+          },
+          grid: {color: 'rgba(31,42,68,.9)'},
+          border: {color: '#1f2a44'}
+        },
+        y: {display: false}
+      }
+    },
+    plugins: [{
+      id: 'needlePlugin',
+      afterDatasetsDraw(chart, args, opts) {
+        const v = (chart.options.plugins.needlePlugin || {}).value;
+        if (v == null) return;
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        const x = xScale.getPixelForValue(v);
+        const top = yScale.getPixelForValue(0) - yScale.height / 2 + 8;
+        const bot = yScale.getPixelForValue(0) + yScale.height / 2 - 8;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.strokeStyle = '#5eead4';
+        ctx.fillStyle = '#5eead4';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bot);
+        ctx.stroke();
+        // diamond tip
+        const mid = (top + bot) / 2;
+        ctx.beginPath();
+        ctx.moveTo(x, mid - 10);
+        ctx.lineTo(x + 7, mid);
+        ctx.lineTo(x, mid + 10);
+        ctx.lineTo(x - 7, mid);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font = '600 12px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#e6ecf5';
+        ctx.textAlign = 'center';
+        ctx.fillText((v > 0 ? '+' : '') + Number(v).toFixed(3), x, top - 6);
+        // threshold ticks
+        ctx.strokeStyle = 'rgba(154,168,195,.5)';
+        ctx.lineWidth = 1;
+        [-0.5, 0, 0.5].forEach(t => {
+          const tx = xScale.getPixelForValue(t);
+          ctx.beginPath();
+          ctx.moveTo(tx, bot + 2);
+          ctx.lineTo(tx, bot + 8);
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+    }]
+  });
+
+  // Sub-index bars
+  const subLabels = SUB_KEYS.map(s => s.short);
+  const subVals = SUB_KEYS.map(s => d.sub_indices[s.key]);
+  const weights = SUB_KEYS.map(s => d.weights[s.key]);
+  const subCtx = document.getElementById('subChart').getContext('2d');
+  new Chart(subCtx, {
+    type: 'bar',
+    data: {
+      labels: subLabels.map((l, i) => l + '  ' + Math.round(weights[i]*100) + '%'),
+      datasets: [{
+        data: subVals,
+        backgroundColor: subVals.map(pressureColor),
+        borderColor: subVals.map(pressureBorder),
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          callbacks: {
+            label: ctx => ' pressure ' + Number(ctx.raw).toFixed(3)
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: -2, max: 2,
+          ticks: {color: '#6b7897'},
+          grid: {color: 'rgba(31,42,68,.9)'},
+          border: {color: '#1f2a44'}
+        },
+        y: {
+          ticks: {color: '#9aa8c3', font: {size: 11}},
+          grid: {display: false},
+          border: {color: '#1f2a44'}
+        }
+      }
+    }
+  });
+
+  // Weighted contributions sorted
+  const contribs = SUB_KEYS.map(s => ({
+    label: s.short,
+    value: d.weights[s.key] * d.sub_indices[s.key]
+  })).sort((a, b) => b.value - a.value);
+  const cCtx = document.getElementById('contribChart').getContext('2d');
+  new Chart(cCtx, {
+    type: 'bar',
+    data: {
+      labels: contribs.map(c => c.label),
+      datasets: [{
+        data: contribs.map(c => c.value),
+        backgroundColor: contribs.map(c => pressureColor(c.value * 3)),
+        borderColor: contribs.map(c => pressureBorder(c.value * 3)),
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          callbacks: {
+            label: ctx => ' contrib ' + Number(ctx.raw).toFixed(4)
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {color: '#6b7897'},
+          grid: {color: 'rgba(31,42,68,.9)'},
+          border: {color: '#1f2a44'}
+        },
+        y: {
+          ticks: {color: '#9aa8c3', font: {size: 11}},
+          grid: {display: false},
+          border: {color: '#1f2a44'}
+        }
+      }
+    }
+  });
+
+  // PC unit TAM + US ASP dual axis — 8Q history + 4Q forecast
+  (function renderTam() {
+    const hist = TAM.history || [];
+    const fc = TAM.forecast || [];
+    const labels = hist.map(p => p.label).concat(fc.map(p => p.label));
+    const units = hist.map(p => p.units_m).concat(fc.map(p => p.units_m));
+    const asps = hist.map(p => p.asp_usd).concat(fc.map(p => p.asp_usd));
+    const colors = hist.map(p => p.color_hex).concat(fc.map(p => p.color_hex));
+    const nHist = hist.length;
+    const aspMeta = TAM.asp_series || {};
+
+    const histData = units.map((v, i) => (i < nHist ? v : null));
+    // Bridge forecast from last history point so the dashed path connects
+    const fcData = units.map((v, i) => (i >= nHist - 1 ? v : null));
+    const aspHistData = asps.map((v, i) => (i < nHist ? v : null));
+    const aspFcData = asps.map((v, i) => (i >= nHist - 1 ? v : null));
+
+    const segColor = (ctx, fallback) => {
+      const i = ctx.p1DataIndex;
+      return colors[i] || fallback;
+    };
+
+    const geo = aspMeta.geography || 'United States (not worldwide)';
+    document.getElementById('tamCaption').textContent =
+      (TAM.chart_caption || '') +
+      ' · ASP axis: ' + (aspMeta.metric || 'US PC ASP') + ' — ' + geo + '.';
+
+    const tamCtx = document.getElementById('tamChart').getContext('2d');
+    new Chart(tamCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Units history (left)',
+            data: histData,
+            yAxisID: 'y',
+            borderColor: '#9aa8c3',
+            backgroundColor: 'transparent',
+            pointBackgroundColor: colors.slice(0, nHist),
+            pointBorderColor: colors.slice(0, nHist),
+            pointRadius: 4,
+            pointHoverRadius: 5,
+            borderWidth: 2.5,
+            tension: 0.15,
+            spanGaps: false,
+            segment: {
+              borderColor: ctx => segColor(ctx, '#9aa8c3')
+            }
+          },
+          {
+            label: 'Units forecast (left)',
+            data: fcData,
+            yAxisID: 'y',
+            borderColor: '#ef4444',
+            backgroundColor: 'transparent',
+            pointBackgroundColor: (ctx) => colors[ctx.dataIndex],
+            pointBorderColor: (ctx) => colors[ctx.dataIndex],
+            pointRadius: (ctx) => (ctx.dataIndex >= nHist ? 4 : 0),
+            pointHoverRadius: (ctx) => (ctx.dataIndex >= nHist ? 5 : 0),
+            borderWidth: 2.5,
+            borderDash: [6, 4],
+            tension: 0.15,
+            spanGaps: false,
+            segment: {
+              borderColor: ctx => segColor(ctx, '#ef4444'),
+              borderDash: () => [6, 4]
+            }
+          },
+          {
+            label: 'ASP history (right)',
+            data: aspHistData,
+            yAxisID: 'y1',
+            borderColor: '#5eead4',
+            backgroundColor: 'transparent',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: '#5eead4',
+            pointBorderWidth: 2,
+            pointRadius: 3.5,
+            pointHoverRadius: 5,
+            borderWidth: 1.75,
+            tension: 0.15,
+            spanGaps: false,
+            order: 0
+          },
+          {
+            label: 'ASP forecast (right)',
+            data: aspFcData,
+            yAxisID: 'y1',
+            borderColor: '#2dd4bf',
+            backgroundColor: 'transparent',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: '#2dd4bf',
+            pointBorderWidth: 2,
+            pointRadius: (ctx) => (ctx.dataIndex >= nHist ? 3.5 : 0),
+            pointHoverRadius: (ctx) => (ctx.dataIndex >= nHist ? 5 : 0),
+            borderWidth: 1.75,
+            borderDash: [4, 4],
+            tension: 0.15,
+            spanGaps: false,
+            order: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {mode: 'index', intersect: false},
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              color: '#9aa8c3',
+              boxWidth: 16,
+              boxHeight: 2,
+              font: {size: 11},
+              filter: (item) => true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const i = ctx.dataIndex;
+                const pt = i < nHist ? hist[i] : fc[i - nHist];
+                if (!pt) return '';
+                const ds = ctx.dataset.label || '';
+                if (ds.indexOf('ASP') >= 0) {
+                  if (pt.asp_usd == null) return '';
+                  const yoy = (pt.asp_yoy_pct != null)
+                    ? ((pt.asp_yoy_pct > 0 ? '+' : '') + Number(pt.asp_yoy_pct).toFixed(1) + '% YoY')
+                    : '';
+                  const st = pt.asp_status || '';
+                  const interp = pt.asp_interpolated ? ' · interpolated' : '';
+                  return ' ASP $' + Number(pt.asp_usd).toFixed(0) +
+                    (yoy ? ' · ' + yoy : '') + ' · ' + st + interp + ' (right)';
+                }
+                const yoy = (pt.yoy_pct != null)
+                  ? ((pt.yoy_pct > 0 ? '+' : '') + Number(pt.yoy_pct).toFixed(1) + '% YoY')
+                  : '';
+                const st = pt.pcds_state_label || '';
+                const status = pt.status || '';
+                return ' ' + Number(pt.units_m).toFixed(1) + 'M · ' + yoy + ' · ' + st + ' · ' + status + ' (left)';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {color: '#9aa8c3', font: {size: 11}},
+            grid: {color: 'rgba(31,42,68,.7)'},
+            border: {color: '#1f2a44'}
+          },
+          y: {
+            position: 'left',
+            title: {display: true, text: 'Units (M) — left', color: '#6b7897', font: {size: 11}},
+            ticks: {color: '#6b7897'},
+            grid: {color: 'rgba(31,42,68,.9)'},
+            border: {color: '#1f2a44'}
+          },
+          y1: {
+            position: 'right',
+            title: {display: true, text: 'US PC ASP (USD) — right', color: '#5eead4', font: {size: 11}},
+            ticks: {
+              color: '#5eead4',
+              callback: (v) => '$' + v
+            },
+            grid: {drawOnChartArea: false},
+            border: {color: 'rgba(94,234,212,.35)'},
+            suggestedMin: 850,
+            suggestedMax: 1150
+          }
+        }
+      }
+    });
+  })();
+
+})();
+</script>
+</body>
+</html>
