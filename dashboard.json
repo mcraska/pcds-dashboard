@@ -1,0 +1,66 @@
+{
+  "asof": "2026-09-17",
+  "method": "Recreation / Semi Desk PCDS v0.2",
+  "version": "0.2",
+  "scenario": "Base",
+  "label_required": "Recreation / Semi Desk PCDS v0.2 \u2014 NOT official 42 Macro VAMS",
+  "inputs": {
+    "dram_qoq_pct": 15.5,
+    "nand_qoq_pct": 12.5,
+    "dram_spot_cool_flag": 1.0,
+    "core_bom_pct": 68.0,
+    "global_pc_units_yoy_pct": -4.0,
+    "us_asp_yoy_pct": 12.0,
+    "entry_pc_units_yoy_pct": -6.5,
+    "hp_ps_rev_pct": 18.0,
+    "hp_ps_units_pct": -16.0,
+    "dell_csg_rev_pct": 20.0,
+    "dell_csg_units_pct": -4.9,
+    "lenovo_pc_rev_pct": 30.0,
+    "lenovo_pc_units_pct": -2.1,
+    "acer_pc_rev_pct": 22.0,
+    "acer_pc_units_pct": -8.5,
+    "asus_pc_rev_pct": 20.0,
+    "asus_pc_units_pct": 0.9,
+    "channel_deferral": 0.55,
+    "ai_capex_index": 1.0,
+    "dell_pc_to_infra_redirect": 1.0,
+    "win11_refresh_done": 0.7,
+    "expected_units_h2_pct": -16.5,
+    "intel_pc_2026_pct": -12.0
+  },
+  "oem_panel_detail": {
+    "hp": 2.0,
+    "dell": 1.66,
+    "lenovo": 2.0,
+    "acer": 2.0,
+    "asus": 1.2733
+  },
+  "sub_indices": {
+    "A_MemoryCostPressure": 1.41,
+    "B_OemAspUnitDivergence": 1.6878,
+    "C_ChannelDeferral": 1.3333,
+    "D_AiReallocationHeat": 1.3,
+    "E_RefreshResidual": 1.3125
+  },
+  "weights": {
+    "A_MemoryCostPressure": 0.25,
+    "B_OemAspUnitDivergence": 0.2,
+    "C_ChannelDeferral": 0.2,
+    "D_AiReallocationHeat": 0.2,
+    "E_RefreshResidual": 0.15
+  },
+  "pressure_weighted": 1.4136,
+  "composite": -1.4136,
+  "pcds_score": -1.4136,
+  "state_code": -2,
+  "state_label": "bearish_pc_demand",
+  "lead_flag": true,
+  "thresholds": {
+    "bullish": 0.5,
+    "bearish": -0.5,
+    "note": "composite >= +0.5 \u2192 +2; -0.5 < composite < +0.5 \u2192 0; composite <= -0.5 \u2192 \u22122"
+  },
+  "inform_only": true,
+  "no_brokerage": true
+}
