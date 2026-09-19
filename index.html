@@ -260,7 +260,7 @@ const TAM = {
   "units": "millions of units",
   "definition": "IDC traditional PCs = desktops + notebooks + workstations; excludes tablets and x86 servers.",
   "tracker_preference": "IDC Worldwide Quarterly Personal Computing Device Tracker (public PRs / secondary tables of those PRs)",
-  "label_required": "Recreation / Semi Desk PCDS v0 \u2014 NOT official 42 Macro VAMS",
+  "label_required": "Semi Desk PCDS v0.2 \u2014 recreation signal",
   "base_pcds": {
     "state_code": -2,
     "state_label": "bearish_pc_demand",
@@ -291,7 +291,7 @@ const TAM = {
   "historical_pcds_proxy_method": {
     "label": "Historical PCDS proxy (recreation) \u2014 not live PCDS",
     "live_pcds_available_from": "2026-09-16",
-    "rule": "Map quarterly YoY unit change (+ optional pull-forward / ASP-pressure flags) to VAMS-style \u22122/0/+2. Thresholds: YoY \u2265 +6% and no inventory/memflation pull-forward flag \u2192 +2; YoY \u2265 0% (or mild decline > \u22123% without ASP bite) \u2192 0; else \u2192 \u22122. Exception: strong YoY with explicit memflation/inventory pull-forward warning \u2192 0 (not +2). Latest history quarter (Q2'26) forced to live Base (\u22122).",
+    "rule": "Map quarterly YoY unit change (+ optional pull-forward / ASP-pressure flags) to PCDS-style \u22122/0/+2. Thresholds: YoY \u2265 +6% and no inventory/memflation pull-forward flag \u2192 +2; YoY \u2265 0% (or mild decline > \u22123% without ASP bite) \u2192 0; else \u2192 \u22122. Exception: strong YoY with explicit memflation/inventory pull-forward warning \u2192 0 (not +2). Latest history quarter (Q2'26) forced to live Base (\u22122).",
     "asp_pressure_inputs_when_known": "Numeric US ASP series now on secondary axis (asp_usd). Qualitative Omdia/IDC/OEM ASP\u2191/units\u2193 flags remain in proxy notes."
   },
   "forecast_method": {
