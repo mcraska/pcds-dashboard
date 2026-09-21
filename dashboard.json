@@ -3,7 +3,7 @@
   "method": "Recreation / Semi Desk PCDS v0.2",
   "version": "0.2",
   "scenario": "Base",
-  "label_required": "Recreation / Semi Desk PCDS v0.2 \u2014 NOT official 42 Macro VAMS",
+  "label_required": "Semi Desk PCDS v0.2 \u2014 recreation signal",
   "inputs": {
     "dram_qoq_pct": 15.5,
     "nand_qoq_pct": 12.5,

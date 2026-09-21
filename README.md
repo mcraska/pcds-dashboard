@@ -1,7 +1,5 @@
-# PCDS Dashboard
+# PCDS dashboard (GitHub Pages)
+
+PC Demand Signal — **Semi Desk PCDS v0.2 — recreation**. Informational only. No brokerage.
 
 Live: https://mcraska.github.io/pcds-dashboard/
-
-PC Demand Signal (Recreation / Semi Desk PCDS v0). Not official 42 Macro VAMS. Informational only.
-
-Auto-refreshed from Leonidas MWF PCDS monitor via `publish_github.sh`.
