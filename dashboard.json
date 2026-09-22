@@ -27,6 +27,7 @@
     "dell_pc_to_infra_redirect": 1.0,
     "msft_windows_oem_yoy_pct": -5.0,
     "win11_desktop_share_pct": 68.6,
+    "win10_desktop_share_pct": 30.14,
     "win11_refresh_done": 0.7,
     "expected_units_h2_pct": -16.5,
     "intel_pc_2026_pct": -12.0
