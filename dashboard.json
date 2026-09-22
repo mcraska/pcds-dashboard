@@ -1,9 +1,9 @@
 {
-  "asof": "2026-09-17",
-  "method": "Recreation / Semi Desk PCDS v0.2",
-  "version": "0.2",
+  "asof": "2026-09-21",
+  "method": "Recreation / Semi Desk PCDS v0.2.1",
+  "version": "0.2.1",
   "scenario": "Base",
-  "label_required": "Semi Desk PCDS v0.2 \u2014 recreation signal",
+  "label_required": "Semi Desk PCDS v0.2.1 \u2014 recreation signal",
   "inputs": {
     "dram_qoq_pct": 15.5,
     "nand_qoq_pct": 12.5,
@@ -25,6 +25,8 @@
     "channel_deferral": 0.55,
     "ai_capex_index": 1.0,
     "dell_pc_to_infra_redirect": 1.0,
+    "msft_windows_oem_yoy_pct": -5.0,
+    "win11_desktop_share_pct": 68.6,
     "win11_refresh_done": 0.7,
     "expected_units_h2_pct": -16.5,
     "intel_pc_2026_pct": -12.0
@@ -41,18 +43,18 @@
     "B_OemAspUnitDivergence": 1.6878,
     "C_ChannelDeferral": 1.3333,
     "D_AiReallocationHeat": 1.3,
-    "E_RefreshResidual": 1.3125
+    "E_WindowsActivations": 1.1455
   },
   "weights": {
     "A_MemoryCostPressure": 0.25,
     "B_OemAspUnitDivergence": 0.2,
     "C_ChannelDeferral": 0.2,
     "D_AiReallocationHeat": 0.2,
-    "E_RefreshResidual": 0.15
+    "E_WindowsActivations": 0.15
   },
-  "pressure_weighted": 1.4136,
-  "composite": -1.4136,
-  "pcds_score": -1.4136,
+  "pressure_weighted": 1.3885,
+  "composite": -1.3885,
+  "pcds_score": -1.3885,
   "state_code": -2,
   "state_label": "bearish_pc_demand",
   "lead_flag": true,

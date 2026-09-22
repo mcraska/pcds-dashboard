@@ -183,17 +183,17 @@
   <div class="footer">
     Paths: <code>METHOD.md</code> · <code>pcds.py</code> · <code>pc-tam-series.json</code> (units + asp_usd) · <code>PC-Demand-Signal-v0.xlsx</code> · <code>last-state.json</code><br/>
     Scenarios: prompt Leonidas — SoftLanding / SoftLanding_Full / HardElasticity / AI_CapEx_Cut / AI_CapEx_Surge<br/>
-    Semi Desk PCDS v0.2 — recreation signal · Inform only — no brokerage
+    Semi Desk PCDS v0.2.1 — recreation signal · Inform only — no brokerage
   </div>
 </div>
 
 <script>
 const PCDS = {
-  "asof": "2026-09-17",
-  "method": "Recreation / Semi Desk PCDS v0.2",
-  "version": "0.2",
+  "asof": "2026-09-21",
+  "method": "Recreation / Semi Desk PCDS v0.2.1",
+  "version": "0.2.1",
   "scenario": "Base",
-  "label_required": "Semi Desk PCDS v0.2 \u2014 recreation signal",
+  "label_required": "Semi Desk PCDS v0.2.1 \u2014 recreation signal",
   "inputs": {
     "dram_qoq_pct": 15.5,
     "nand_qoq_pct": 12.5,
@@ -215,6 +215,9 @@ const PCDS = {
     "channel_deferral": 0.55,
     "ai_capex_index": 1.0,
     "dell_pc_to_infra_redirect": 1.0,
+    "msft_windows_oem_yoy_pct": -5.0,
+    "win11_desktop_share_pct": 68.6,
+    "win10_desktop_share_pct": 30.14,
     "win11_refresh_done": 0.7,
     "expected_units_h2_pct": -16.5,
     "intel_pc_2026_pct": -12.0
@@ -231,18 +234,18 @@ const PCDS = {
     "B_OemAspUnitDivergence": 1.6878,
     "C_ChannelDeferral": 1.3333,
     "D_AiReallocationHeat": 1.3,
-    "E_RefreshResidual": 1.3125
+    "E_WindowsActivations": 1.1455
   },
   "weights": {
     "A_MemoryCostPressure": 0.25,
     "B_OemAspUnitDivergence": 0.2,
     "C_ChannelDeferral": 0.2,
     "D_AiReallocationHeat": 0.2,
-    "E_RefreshResidual": 0.15
+    "E_WindowsActivations": 0.15
   },
-  "pressure_weighted": 1.4136,
-  "composite": -1.4136,
-  "pcds_score": -1.4136,
+  "pressure_weighted": 1.3885,
+  "composite": -1.3885,
+  "pcds_score": -1.3885,
   "state_code": -2,
   "state_label": "bearish_pc_demand",
   "lead_flag": true,
@@ -893,10 +896,22 @@ const SEED_META = {
   "intel_pc_2026_pct": {
     "label": "Reported",
     "note": "Intel industry PC 2026 low-double-digit decline proxy"
+  },
+  "msft_windows_oem_yoy_pct": {
+    "label": "Confirmed",
+    "note": "MSFT FY26 Q4 Windows OEM \u22125% YoY (Windows OEM and Devices \u22127%). Call: lower PC demand + tough Win10 EOS comps. OEM rev YoY is the public activation proxy \u2014 MSFT does not publish raw activation unit totals."
+  },
+  "win11_desktop_share_pct": {
+    "label": "Reported",
+    "note": "StatCounter desktop Windows version market share worldwide Aug 2026 \u2014 Win11 68.6% (pageview share, not devices). \u2260 activations; proxy for refresh maturity / EOS pull largely done."
+  },
+  "win10_desktop_share_pct": {
+    "label": "Reported",
+    "note": "StatCounter desktop Win10 share worldwide Aug 2026 \u2014 30.14%. Companion hangover metric (not scored; win11_desktop_share_pct drives share_z)."
   }
 };
-const SUB_KEYS = [{"key": "A_MemoryCostPressure", "short": "A MemoryCost", "name": "MemoryCost"}, {"key": "B_OemAspUnitDivergence", "short": "B OemAspUnit", "name": "OemAspUnit"}, {"key": "C_ChannelDeferral", "short": "C ChannelDeferral", "name": "ChannelDeferral"}, {"key": "D_AiReallocationHeat", "short": "D AiReallocation", "name": "AiReallocation"}, {"key": "E_RefreshResidual", "short": "E RefreshResidual", "name": "RefreshResidual"}];
-const INPUT_ROWS = [{"key": "dram_qoq_pct", "label": "PC DRAM QoQ %", "fmt": "15.5"}, {"key": "nand_qoq_pct", "label": "NAND QoQ %", "fmt": "12.5"}, {"key": "dram_spot_cool_flag", "label": "DRAM spot cool flag", "fmt": "1"}, {"key": "core_bom_pct", "label": "Core BOM % (CPU+DRAM+SSD)", "fmt": "68"}, {"key": "global_pc_units_yoy_pct", "label": "Global PC units YoY %", "fmt": "-4"}, {"key": "us_asp_yoy_pct", "label": "US ASP YoY %", "fmt": "12"}, {"key": "entry_pc_units_yoy_pct", "label": "Entry PC units YoY %", "fmt": "-6.5"}, {"key": "hp_ps_rev_pct", "label": "HP PS rev %", "fmt": "18"}, {"key": "hp_ps_units_pct", "label": "HP PS units %", "fmt": "-16"}, {"key": "dell_csg_rev_pct", "label": "Dell CSG rev %", "fmt": "20"}, {"key": "dell_csg_units_pct", "label": "Dell CSG units %", "fmt": "-4.9"}, {"key": "lenovo_pc_rev_pct", "label": "Lenovo PC rev %", "fmt": "30"}, {"key": "lenovo_pc_units_pct", "label": "Lenovo PC units %", "fmt": "-2.1"}, {"key": "acer_pc_rev_pct", "label": "Acer PC rev %", "fmt": "22"}, {"key": "acer_pc_units_pct", "label": "Acer PC units %", "fmt": "-8.5"}, {"key": "asus_pc_rev_pct", "label": "Asus PC rev %", "fmt": "20"}, {"key": "asus_pc_units_pct", "label": "Asus PC units %", "fmt": "0.9"}, {"key": "channel_deferral", "label": "Channel deferral", "fmt": "0.55"}, {"key": "ai_capex_index", "label": "AI CapEx index", "fmt": "1"}, {"key": "dell_pc_to_infra_redirect", "label": "Dell PC\u2192infra redirect", "fmt": "1"}, {"key": "win11_refresh_done", "label": "Win11 refresh done", "fmt": "0.7"}, {"key": "expected_units_h2_pct", "label": "Expected units H2 %", "fmt": "-16.5"}, {"key": "intel_pc_2026_pct", "label": "Intel PC 2026 %", "fmt": "-12"}];
+const SUB_KEYS = [{"key": "A_MemoryCostPressure", "short": "A MemoryCost", "name": "MemoryCost"}, {"key": "B_OemAspUnitDivergence", "short": "B OemAspUnit", "name": "OemAspUnit"}, {"key": "C_ChannelDeferral", "short": "C ChannelDeferral", "name": "ChannelDeferral"}, {"key": "D_AiReallocationHeat", "short": "D AiReallocation", "name": "AiReallocation"}, {"key": "E_WindowsActivations", "short": "E WindowsActivations", "name": "WindowsActivations"}];
+const INPUT_ROWS = [{"key": "dram_qoq_pct", "label": "PC DRAM QoQ %", "fmt": "15.5"}, {"key": "nand_qoq_pct", "label": "NAND QoQ %", "fmt": "12.5"}, {"key": "dram_spot_cool_flag", "label": "DRAM spot cool flag", "fmt": "1"}, {"key": "core_bom_pct", "label": "Core BOM % (CPU+DRAM+SSD)", "fmt": "68"}, {"key": "global_pc_units_yoy_pct", "label": "Global PC units YoY %", "fmt": "-4"}, {"key": "us_asp_yoy_pct", "label": "US ASP YoY %", "fmt": "12"}, {"key": "entry_pc_units_yoy_pct", "label": "Entry PC units YoY %", "fmt": "-6.5"}, {"key": "hp_ps_rev_pct", "label": "HP PS rev %", "fmt": "18"}, {"key": "hp_ps_units_pct", "label": "HP PS units %", "fmt": "-16"}, {"key": "dell_csg_rev_pct", "label": "Dell CSG rev %", "fmt": "20"}, {"key": "dell_csg_units_pct", "label": "Dell CSG units %", "fmt": "-4.9"}, {"key": "lenovo_pc_rev_pct", "label": "Lenovo PC rev %", "fmt": "30"}, {"key": "lenovo_pc_units_pct", "label": "Lenovo PC units %", "fmt": "-2.1"}, {"key": "acer_pc_rev_pct", "label": "Acer PC rev %", "fmt": "22"}, {"key": "acer_pc_units_pct", "label": "Acer PC units %", "fmt": "-8.5"}, {"key": "asus_pc_rev_pct", "label": "Asus PC rev %", "fmt": "20"}, {"key": "asus_pc_units_pct", "label": "Asus PC units %", "fmt": "0.9"}, {"key": "channel_deferral", "label": "Channel deferral", "fmt": "0.55"}, {"key": "ai_capex_index", "label": "AI CapEx index", "fmt": "1"}, {"key": "dell_pc_to_infra_redirect", "label": "Dell PC\u2192infra redirect", "fmt": "1"}, {"key": "msft_windows_oem_yoy_pct", "label": "MSFT Windows OEM YoY %", "fmt": "-5"}, {"key": "win11_desktop_share_pct", "label": "Win11 desktop share %", "fmt": "68.6"}, {"key": "win10_desktop_share_pct", "label": "Win10 desktop share %", "fmt": "30.14"}, {"key": "win11_refresh_done", "label": "Win11 refresh done", "fmt": "0.7"}, {"key": "expected_units_h2_pct", "label": "Expected units H2 %", "fmt": "-16.5"}, {"key": "intel_pc_2026_pct", "label": "Intel PC 2026 %", "fmt": "-12"}];
 
 function pressureColor(v) {
   const t = Math.max(0, Math.min(1, (v + 2) / 4));
