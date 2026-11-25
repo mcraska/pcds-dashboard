@@ -189,7 +189,7 @@
 
 <script>
 const PCDS = {
-  "asof": "2026-10-09",
+  "asof": "2026-11-25",
   "method": "Recreation / Semi Desk PCDS v0.2.1",
   "version": "0.2.1",
   "scenario": "Base",
@@ -202,10 +202,10 @@ const PCDS = {
     "global_pc_units_yoy_pct": -21.2,
     "us_asp_yoy_pct": 12.0,
     "entry_pc_units_yoy_pct": -6.5,
-    "hp_ps_rev_pct": 18.0,
-    "hp_ps_units_pct": -16.0,
-    "dell_csg_rev_pct": 20.0,
-    "dell_csg_units_pct": -4.9,
+    "hp_ps_rev_pct": 14.0,
+    "hp_ps_units_pct": -29.0,
+    "dell_csg_rev_pct": 3.0,
+    "dell_csg_units_pct": -25.0,
     "lenovo_pc_rev_pct": 30.0,
     "lenovo_pc_units_pct": -2.1,
     "acer_pc_rev_pct": 22.0,
@@ -216,25 +216,25 @@ const PCDS = {
     "ai_capex_index": 1.0,
     "dell_pc_to_infra_redirect": 1.0,
     "msft_windows_oem_yoy_pct": -27.0,
-    "win11_desktop_share_pct": 71.5,
-    "win10_desktop_share_pct": 27.77,
+    "win11_desktop_share_pct": 74.2,
+    "win10_desktop_share_pct": 25.22,
     "win11_refresh_done": 0.7,
     "expected_units_h2_pct": -22.6,
     "intel_pc_2026_pct": -12.0
   },
   "oem_panel_detail": {
     "hp": 2.0,
-    "dell": 1.66,
+    "dell": 1.8667,
     "lenovo": 2.0,
     "acer": 2.0,
     "asus": 1.2733
   },
   "sub_indices": {
     "A_MemoryCostPressure": 1.41,
-    "B_OemAspUnitDivergence": 1.8003,
+    "B_OemAspUnitDivergence": 1.8148,
     "C_ChannelDeferral": 1.3333,
     "D_AiReallocationHeat": 1.3,
-    "E_WindowsActivations": 1.5762
+    "E_WindowsActivations": 1.6572
   },
   "weights": {
     "A_MemoryCostPressure": 0.25,
@@ -243,9 +243,9 @@ const PCDS = {
     "D_AiReallocationHeat": 0.2,
     "E_WindowsActivations": 0.15
   },
-  "pressure_weighted": 1.4756,
-  "composite": -1.4756,
-  "pcds_score": -1.4756,
+  "pressure_weighted": 1.4907,
+  "composite": -1.4907,
+  "pcds_score": -1.4907,
   "state_code": -2,
   "state_label": "bearish_pc_demand",
   "lead_flag": true,
@@ -835,19 +835,19 @@ const SEED_META = {
   },
   "hp_ps_rev_pct": {
     "label": "Confirmed",
-    "note": "HP Personal Systems rev +18% YoY (Q3 FY26)"
+    "note": "HP Personal Systems rev +14% YoY (Q4 FY26; $11.751B vs $10.353B, +13.5% unrounded). Commercial PS +23%, Consumer PS -7%."
   },
   "hp_ps_units_pct": {
     "label": "Confirmed",
-    "note": "HP PS total units \u221216% YoY (Consumer \u221219%, Commercial \u221214%)"
+    "note": "HP PS total units -29% YoY (Q4 FY26; Consumer -31%, Commercial -28%)."
   },
   "dell_csg_rev_pct": {
     "label": "Confirmed",
-    "note": "Dell CSG rev $15.0B +20% YoY (FQ2 FY27); Commercial +22%, Consumer +7%"
+    "note": "Dell CSG rev $12.9B +3% YoY (FQ3 FY27, quarter ended Oct 30, 2026); Commercial $11.3B +6%, Consumer $1.586B -15%. Prior FQ2 +20%."
   },
   "dell_csg_units_pct": {
     "label": "Reported",
-    "note": "Dell IR did not disclose Q2 CSG units; Omdia Q2 Dell shipments \u22124.9% YoY (proxy). Call color: cost-sensitive customers extending cycles; redirected components PC\u2192infra."
+    "note": "Dell IR did not disclose FQ3 CSG units. Proxy: IDC prelim CQ3 2026 Dell shipments -25% YoY to 7.6M (same IDC print already used as the -20.1% global cross-check on 2026-10-09). Period offset: IDC CQ3 is Jul-Sep; Dell FQ3 is Aug-Oct. Prior proxy was Omdia Q2 -4.9%."
   },
   "lenovo_pc_rev_pct": {
     "label": "Confirmed",
@@ -903,15 +903,15 @@ const SEED_META = {
   },
   "win11_desktop_share_pct": {
     "label": "Reported",
-    "note": "StatCounter desktop Windows version market share worldwide Sep 2026 FINAL \u2014 Win11 71.50% (pageview share, not devices; CSV pulled 2026-10-05 revises partial-month 71.44% read of 10-04). \u2260 activations; proxy for refresh maturity / EOS pull largely done. Prior Aug 68.6%."
+    "note": "StatCounter desktop Windows version market share worldwide Oct 2026 FINAL \u2014 Win11 74.2% (pageview share, not devices; official CSV pulled 2026-11-25). Not activations; proxy for refresh maturity / EOS pull largely done. Prior Sep final 71.50%. Nov 2026 partial (74.44% on the same CSV, month not closed) is watch-only and is not scored."
   },
   "win10_desktop_share_pct": {
     "label": "Reported",
-    "note": "StatCounter desktop Win10 share worldwide Sep 2026 FINAL \u2014 27.77% (revises 27.83% partial read). Companion hangover metric (not scored). Aug 30.15%."
+    "note": "StatCounter desktop Win10 share worldwide Oct 2026 FINAL \u2014 25.22% (official CSV pulled 2026-11-25). Companion hangover metric (not scored). Prior Sep final 27.77%. Nov 2026 partial 24.98% is watch-only and is not scored."
   }
 };
 const SUB_KEYS = [{"key": "A_MemoryCostPressure", "short": "A MemoryCost", "name": "MemoryCost"}, {"key": "B_OemAspUnitDivergence", "short": "B OemAspUnit", "name": "OemAspUnit"}, {"key": "C_ChannelDeferral", "short": "C ChannelDeferral", "name": "ChannelDeferral"}, {"key": "D_AiReallocationHeat", "short": "D AiReallocation", "name": "AiReallocation"}, {"key": "E_WindowsActivations", "short": "E WindowsActivations", "name": "WindowsActivations"}];
-const INPUT_ROWS = [{"key": "dram_qoq_pct", "label": "PC DRAM QoQ %", "fmt": "15.5"}, {"key": "nand_qoq_pct", "label": "NAND QoQ %", "fmt": "12.5"}, {"key": "dram_spot_cool_flag", "label": "DRAM spot cool flag", "fmt": "1"}, {"key": "core_bom_pct", "label": "Core BOM % (CPU+DRAM+SSD)", "fmt": "68"}, {"key": "global_pc_units_yoy_pct", "label": "Global PC units YoY %", "fmt": "-21.2"}, {"key": "us_asp_yoy_pct", "label": "US ASP YoY %", "fmt": "12"}, {"key": "entry_pc_units_yoy_pct", "label": "Entry PC units YoY %", "fmt": "-6.5"}, {"key": "hp_ps_rev_pct", "label": "HP PS rev %", "fmt": "18"}, {"key": "hp_ps_units_pct", "label": "HP PS units %", "fmt": "-16"}, {"key": "dell_csg_rev_pct", "label": "Dell CSG rev %", "fmt": "20"}, {"key": "dell_csg_units_pct", "label": "Dell CSG units %", "fmt": "-4.9"}, {"key": "lenovo_pc_rev_pct", "label": "Lenovo PC rev %", "fmt": "30"}, {"key": "lenovo_pc_units_pct", "label": "Lenovo PC units %", "fmt": "-2.1"}, {"key": "acer_pc_rev_pct", "label": "Acer PC rev %", "fmt": "22"}, {"key": "acer_pc_units_pct", "label": "Acer PC units %", "fmt": "-8.5"}, {"key": "asus_pc_rev_pct", "label": "Asus PC rev %", "fmt": "20"}, {"key": "asus_pc_units_pct", "label": "Asus PC units %", "fmt": "0.9"}, {"key": "channel_deferral", "label": "Channel deferral", "fmt": "0.55"}, {"key": "ai_capex_index", "label": "AI CapEx index", "fmt": "1"}, {"key": "dell_pc_to_infra_redirect", "label": "Dell PC\u2192infra redirect", "fmt": "1"}, {"key": "msft_windows_oem_yoy_pct", "label": "MSFT Windows OEM YoY %", "fmt": "-27"}, {"key": "win11_desktop_share_pct", "label": "Win11 desktop share %", "fmt": "71.5"}, {"key": "win10_desktop_share_pct", "label": "Win10 desktop share %", "fmt": "27.77"}, {"key": "win11_refresh_done", "label": "Win11 refresh done", "fmt": "0.7"}, {"key": "expected_units_h2_pct", "label": "Expected units H2 %", "fmt": "-22.6"}, {"key": "intel_pc_2026_pct", "label": "Intel PC 2026 %", "fmt": "-12"}];
+const INPUT_ROWS = [{"key": "dram_qoq_pct", "label": "PC DRAM QoQ %", "fmt": "15.5"}, {"key": "nand_qoq_pct", "label": "NAND QoQ %", "fmt": "12.5"}, {"key": "dram_spot_cool_flag", "label": "DRAM spot cool flag", "fmt": "1"}, {"key": "core_bom_pct", "label": "Core BOM % (CPU+DRAM+SSD)", "fmt": "68"}, {"key": "global_pc_units_yoy_pct", "label": "Global PC units YoY %", "fmt": "-21.2"}, {"key": "us_asp_yoy_pct", "label": "US ASP YoY %", "fmt": "12"}, {"key": "entry_pc_units_yoy_pct", "label": "Entry PC units YoY %", "fmt": "-6.5"}, {"key": "hp_ps_rev_pct", "label": "HP PS rev %", "fmt": "14"}, {"key": "hp_ps_units_pct", "label": "HP PS units %", "fmt": "-29"}, {"key": "dell_csg_rev_pct", "label": "Dell CSG rev %", "fmt": "3"}, {"key": "dell_csg_units_pct", "label": "Dell CSG units %", "fmt": "-25"}, {"key": "lenovo_pc_rev_pct", "label": "Lenovo PC rev %", "fmt": "30"}, {"key": "lenovo_pc_units_pct", "label": "Lenovo PC units %", "fmt": "-2.1"}, {"key": "acer_pc_rev_pct", "label": "Acer PC rev %", "fmt": "22"}, {"key": "acer_pc_units_pct", "label": "Acer PC units %", "fmt": "-8.5"}, {"key": "asus_pc_rev_pct", "label": "Asus PC rev %", "fmt": "20"}, {"key": "asus_pc_units_pct", "label": "Asus PC units %", "fmt": "0.9"}, {"key": "channel_deferral", "label": "Channel deferral", "fmt": "0.55"}, {"key": "ai_capex_index", "label": "AI CapEx index", "fmt": "1"}, {"key": "dell_pc_to_infra_redirect", "label": "Dell PC\u2192infra redirect", "fmt": "1"}, {"key": "msft_windows_oem_yoy_pct", "label": "MSFT Windows OEM YoY %", "fmt": "-27"}, {"key": "win11_desktop_share_pct", "label": "Win11 desktop share %", "fmt": "74.2"}, {"key": "win10_desktop_share_pct", "label": "Win10 desktop share %", "fmt": "25.22"}, {"key": "win11_refresh_done", "label": "Win11 refresh done", "fmt": "0.7"}, {"key": "expected_units_h2_pct", "label": "Expected units H2 %", "fmt": "-22.6"}, {"key": "intel_pc_2026_pct", "label": "Intel PC 2026 %", "fmt": "-12"}];
 
 function pressureColor(v) {
   const t = Math.max(0, Math.min(1, (v + 2) / 4));
